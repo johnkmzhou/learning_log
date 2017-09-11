@@ -7,9 +7,9 @@ Install Python 3.
 
 Set up your virtual environment: http://docs.python-guide.org/en/latest/dev/virtualenvs/
 
-Install Django in your virtual environment:
+Install packages in your virtual environment:
 
-    pip install Django
+    pip install -r requirements.txt
 
 Run migrations:
 

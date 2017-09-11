@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from .models import Topic
-from .forms import TopicForm
+from .forms import TopicForm, EntryForm
 
 def index(request):
 	"""The home page for Learning Log"""
@@ -34,3 +34,20 @@ def new_topic(request):
 			return HttpResponseRedirect(reverse('learning_logs:topics'))
 	context = {'form' : form}
 	return render(request, 'learning_logs/new_topic.html', context)
+
+def new_entry(request, topic_id):
+	"""Add a new entry for a particular topic."""
+	topic = Topic.objects.get(id=topic_id)
+	if request.method != 'POST':
+		# No data submitted; create a blank form.
+		form = EntryForm()
+	else:
+		# POST data submited; process data
+		form = EntryForm(data=request.POST)
+		if form.is_valid():
+			entry = form.save(commit=False)
+			entry.topic = topic
+			entry.save()
+			return HttpResponseRedirect(reverse('learning_logs:topic', args=[topic_id]))
+	context = {'topic': topic, 'form': form}
+	return render(request, 'learning_logs/new_entry.html', context)
