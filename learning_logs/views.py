@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from .models import Topic, Entry
 from .forms import TopicForm, EntryForm
 
@@ -12,7 +13,7 @@ def index(request):
 @login_required
 def topics(request):
 	"""Show all topics."""
-	topics = Topic.objects.filter(owner=request.user).order_by('date_added')
+	topics = Topic.objects.filter(Q(owner=request.user) | Q(public = True)).order_by('date_added')
 	context = {'topics': topics}
 	return render(request, 'learning_logs/topics.html', context)
 
@@ -21,7 +22,7 @@ def topic(request, topic_id):
 	"""Show a single topic and all its entries."""
 	topic = get_object_or_404(Topic, id=topic_id)
 	# Make sure the topic belongs to the current user.
-	if topic.owner != request.user:
+	if not topic.public and topic.owner != request.user:
 		raise Http404
 	entries = topic.entry_set.order_by('-date_added')
 	context = {'topic': topic, 'entries': entries}
@@ -67,7 +68,7 @@ def edit_entry(request, entry_id):
 	"""Edit an existing entry."""
 	entry = get_object_or_404(Entry, id=entry_id)
 	topic = entry.topic
-	if topic.owner != request.user:
+	if not topic.public and topic.owner != request.user:
 		raise Http404
 	if request.method != 'POST':
 		# Initial request; pre-fill form with the current entry.
