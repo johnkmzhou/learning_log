@@ -14,5 +14,7 @@
 		{% endfor %}
 	</ul>
 
-	<h3><a href="{% url 'learning_logs:new_topic' %}">Add a new topic</a></h3>
+	{% if user.is_authenticated %}
+		<h3><a href="{% url 'learning_logs:new_topic' %}">Add a new topic</a></h3>
+	{% endif %}
 {% endblock content %}
